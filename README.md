@@ -14,7 +14,7 @@ Click on "EC2" in the services section, then click on "Launch EC2." Select the A
 
 Under Security Groups, click "Edit Security Groups" and add three rules: one for SSH, one for HTTP, and one for HTTPS. For each one, select a source of "My IP."
 
-Under Instance Details, click "Edit Instance Details." Change the number of instances to 2 instead of 1. Change the IAM role to the "CS643_Role" that you created in the previous step.
+Under Instance Details, click "Edit Instance Details." Change the number of instances to 2 instead of 1.
 
 Click Launch. On the dialog that pops up, select "Create a new key pair" and name it "cs643." Hit "Download key pair." Open a termianl and move the .pem file to your home directory. Run the following command to set the correct permissions for the .pem file:
 
@@ -48,6 +48,18 @@ Run the following commands:
     sudo apt install openjdk-11-jdk-headless
     sudo apt install maven
 
+## AWS SDK Setup
+
+Download the AWS SDK for Java by running the following commands:
+
+    $ cd ~
+    $ git clone https://github.com/aws/aws-sdk-java-v2.git
+    $ cd aws-sdk-java-v2
+
+Install the entire SDK with the following command:
+
+    $ mvn clean install
+
 ## Maven Project Setup
 
 Run the following command:
@@ -74,5 +86,6 @@ Add the following dependencies for SQS, S3, and Rekognition to the "dependencies
 
 Run the following command to generate a .jar file in the target/ directory and then run the DetectCars.java code:
 
-    mvn package
-    java -cp target/assignment1-1.0-SNAPSHOT.jar com.cs643.DetectCars
+    $ mvn package
+    $ export CLASSPATH=target/assignment1-1.0-SNAPSHOT.jar:~/aws-sdk-java-v2/target/<NAME_OF_JAR_FILE>.jar
+    $ java com.cs643.DetectCars
