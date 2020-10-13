@@ -30,6 +30,8 @@ After you have connected, run the following commands to update Java from 1.7 to 
     $ sudo /usr/sbin/alternatives --config java
     $ sudo /usr/sbin/alternatives --config javac
 
+THE FOLLOWING STEP MAY BE OPTIONAL....
+
 Install Apache Maven on the EC2:
 
     $ sudo wget https://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo -O /etc/yum.repos.d/epel-apache-maven.repo
@@ -40,6 +42,8 @@ Install Apache Maven on the EC2:
 
 Login to AWS Educate account, and in Vocareum, click on "Account Details." Click on "Access your credentials" and copy the text that is displayed. On your EC2, create a file, `~/.aws/credentials`, and paste those copied credentials into this file. Re-copy and paste these credentials whenever they change (after your session ends).
 
+If testing locally, do the same steps as above except on your local machine.
+
 ## Local Java Setup
 
 Run the following commands:
@@ -49,6 +53,8 @@ Run the following commands:
     sudo apt install maven
 
 ## AWS SDK Setup
+
+THIS ENTIRE SECTION IS PROBABLY UNNECESSARY...
 
 Download the AWS SDK for Java by running the following commands:
 
@@ -62,30 +68,8 @@ Install the entire SDK with the following command:
 
 ## Maven Project Setup
 
-Run the following command:
+After cloning this repository, run the following commands to generate a .jar file in the target/ directory and then run the DetectCars.java code:
 
-    mvn org.apache.maven.plugins:maven-archetype-plugin:3.1.0:generate -DarchetypeGroupId=software.amazon.awssdk -DarchetypeArtifactId=archetype-lambda -DarchetypeVersion=2.14.3 -Dservice=s3 -Dregion=US_EAST_1 -DgroupId=com.cs643 -DartifactId=assignment1
-
-Add the following dependencies for SQS, S3, and Rekognition to the "dependencies" object in the pom.xml file that is created:
-
-    <dependency>
-        <groupId>software.amazon.awssdk</groupId>
-        <artifactId>s3</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>software.amazon.awssdk</groupId>
-        <artifactId>rekognition</artifactId>
-        <version>2.13.31</version>
-    </dependency>
-
-    <dependency>
-        <groupId>software.amazon.awssdk</groupId>
-        <artifactId>sqs</artifactId>
-    </dependency>
-
-Run the following command to generate a .jar file in the target/ directory and then run the DetectCars.java code:
-
-    $ mvn package
-    $ export CLASSPATH=target/assignment1-1.0-SNAPSHOT.jar:~/aws-sdk-java-v2/target/<NAME_OF_JAR_FILE>.jar
-    $ java com.cs643.DetectCars
+    $ cd cs643-programming-assignment/assignment1
+    $ mvn clean install package
+    $ java -jar target/assignment1-1.0-SNAPSHOT.jar
