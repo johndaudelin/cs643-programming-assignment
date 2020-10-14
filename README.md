@@ -41,9 +41,17 @@ Upon running the second command, you should enter the number that corresponds to
 
 Login to your AWS Educate account, and in Vocareum, click on "Account Details." Next to "AWS CLI," click Show and copy the text that is displayed. SSH into both EC2's that you created in the previous step, and on each one, create a file, `~/.aws/credentials`. Paste those copied credentials into this file on each EC2. You will need to re-copy and paste these credentials onto both EC2's whenever they change (after your session ends).
 
+### Java/Maven Installation
+
+If you do not have an up-to-date version of Java or Maven installed on your local machine, run the following commands locally:
+
+    sudo apt install openjdk-11-jre-headless
+    sudo apt install openjdk-11-jdk-headless
+    sudo apt install maven
+
 ### Running the application
 
-In the terminal on your LOCAL machine, run the following commands to generate the .jar files for the two applications you will want to run on your EC2's:
+In the terminal on your local machine, run the following commands to generate the .jar files for the two applications you will want to run on your EC2's.
 
     $ git clone https://github.com/johndaudelin/cs643-programming-assignment.git
     $ cd cs643-programming-assignment/text-recognition
@@ -52,7 +60,7 @@ In the terminal on your LOCAL machine, run the following commands to generate th
     $ mvn clean install package
     $ cd ..
 
-Run the following command to securely copy the car-recognition .jar file to one of your EC2's, which we'll call EC2-A:
+Now, run the following command to securely copy the car-recognition .jar file to one of your EC2's, which we'll call EC2-A:
 
     $ scp -i ~/cs643.pem car-recognition/target/car-recognition-1.0-SNAPSHOT.jar ec2-user@<YOUR_PUBLIC_DNS_FOR_EC2_A>:~/car-recognition.jar
 
@@ -70,35 +78,3 @@ This will begin running the code for text recognition. However, since it depends
     $ java -jar ~/car-recognition.jar
 
 Now, both programs will be running simultaneously. The program on EC2-A is processing all images in the S3 bucket (njit-cs-643) and sending the indexes of images that include cars to EC2-B through SQS, which in turn is processing these images to find out which ones include text as well. Finally, once both programs have finished running, you will find a file named `output.txt` on EC2-B in the home directory. This output file will display the indexes of images that contained both cars and text, along with the associated text from each image.
-
-## Local Steps
-
-To setup and run this program locally, follow these steps.
-
-### Java/Maven Installation
-
-Run the following commands:
-
-    sudo apt install openjdk-11-jre-headless
-    sudo apt install openjdk-11-jdk-headless
-    sudo apt install maven
-
-### Credentials Setup
-
-Login to your AWS Educate account, and in Vocareum, click on "Account Details." Click on "Access your credentials" and copy the text that is displayed. Create a file on your machine, `~/.aws/credentials`. Paste those copied credentials into this file. You will need to re-copy and paste these credentials whenever they change (after your session ends).
-
-### Running locally
-
-After cloning this repository, run the following commands to run DetectText.java:
-
-    $ cd cs643-programming-assignment/text-recognition
-    $ mvn clean install package
-    $ java -jar target/text-recognition-1.0-SNAPSHOT.jar
-
-While this is running, open another terminal and run the following commands to run DetectCars.java:
-
-    $ cd cs643-programming-assignment/car-recognition
-    $ mvn clean install package
-    $ java -jar target/car-recognition-1.0-SNAPSHOT.jar
-
-Once DetectText has finished running, you should see a file named "output.txt" in the text-recognition folder with the final results.
