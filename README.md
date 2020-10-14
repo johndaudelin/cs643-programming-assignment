@@ -22,7 +22,7 @@ Under Security Groups, click "Edit Security Groups" and add three rules: one for
 
 Under Instance Details, click "Edit Instance Details." Change the number of instances to 2 instead of 1. Hit Review and Launch.
 
-Click Launch. On the dialog that pops up, select "Create a new key pair" and name it "cs643." Hit "Download key pair." Hit Launch Instances, and then hit View Instances. You will probably see a status of "Pending" for the Instance State of each EC2. While waiting for these to switch to "Running, open a terminal and move the .pem file you downloaded to your home directory. Run the following command to set the correct permissions for the .pem file:
+Click Launch. On the dialog that pops up, select "Create a new key pair" and name it "cs643." Hit "Download key pair." Hit Launch Instances, and then hit View Instances. You will probably see a status of "Pending" for the Instance State of each EC2. While waiting for these to switch to "Running," open a terminal and move the .pem file you downloaded to your home directory. Run the following command to set the correct permissions for the .pem file:
 
     $ chmod 400 cs643.pem
 
