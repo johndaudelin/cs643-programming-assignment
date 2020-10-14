@@ -24,6 +24,11 @@ import software.amazon.awssdk.services.sqs.model.QueueNameExistsException;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 
 import java.util.List;
+import java.util.Map;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class DetectText {
 
@@ -66,6 +71,7 @@ public class DetectText {
         // Process images from the queue until "-1" message is received
         try {
             boolean endOfQueue = false;
+            HashMap<String, String> outputs = new HashMap<String, String>();
             while (!endOfQueue) {
                 // Retrieve next message
                 ReceiveMessageRequest receiveMessageRequest = ReceiveMessageRequest.builder().queueUrl(queueUrl)
@@ -86,16 +92,14 @@ public class DetectText {
 
                         DetectTextResponse result = rek.detectText(request);
                         List<TextDetection> textDetections = result.textDetections();
-                        if (textDetections.size() == 0) {
-                            System.out.println(label + " has no text");
-                        } else {
-                            System.out.print(label + ":");
+                        if (textDetections.size() != 0) {
+                            String text = "";
                             for (TextDetection textDetection : textDetections) {
                                 if (textDetection.type().equals(TextTypes.WORD)) {
-                                    System.out.print(" " + textDetection.detectedText());
+                                    text = text.concat(" " + textDetection.detectedText());
                                 }
                             }
-                            System.out.println();
+                            outputs.put(label, text);
                         }
                     }
 
@@ -104,6 +108,22 @@ public class DetectText {
                             .receiptHandle(message.receiptHandle()).build();
                     sqs.deleteMessage(deleteMessageRequest);
                 }
+            }
+            try {
+                FileWriter writer = new FileWriter("output.txt");
+
+                Iterator it = outputs.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry pair = (Map.Entry) it.next();
+                    writer.write(pair.getKey() + ":" + pair.getValue() + "\n");
+                    it.remove();
+                }
+
+                writer.close();
+                System.out.println("Results written to file output.txt");
+            } catch (IOException e) {
+                System.out.println("An error occurred writing to file.");
+                e.printStackTrace();
             }
         } catch (Exception e) {
             System.err.println(e.getLocalizedMessage());
