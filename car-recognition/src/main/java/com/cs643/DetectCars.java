@@ -31,13 +31,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
 
 public class DetectCars {
 
     public static void main(String[] args) {
 
         String bucketName = "njit-cs-643";
-        String queueName = "cars";
+        String queueName = "cars.fifo"; // Fifo queue so that "-1" is always processed last
+        String queueGroup = "group1";
 
         Region region = Region.US_EAST_1;
         S3Client s3 = S3Client.builder().region(region).build();
@@ -45,26 +47,26 @@ public class DetectCars {
         SqsClient sqs = SqsClient.builder().region(region).build();
 
         // CODE TO RETRIEVE ALL 10 IMAGES FROM S3 AND STORE THEM LOCALLY
-        /*
-         * for (int i = 1; i < 11; i++) { getImage(s3, bucketName, Integer.toString(i) +
-         * ".jpg"); }
-         */
+        // for (int i = 1; i < 11; i++) {
+        // getImage(s3, bucketName, Integer.toString(i) + ".jpg");
+        // }
 
-        processBucketImages(s3, rek, sqs, bucketName, queueName);
+        processBucketImages(s3, rek, sqs, bucketName, queueName, queueGroup);
     }
 
     public static void processBucketImages(S3Client s3, RekognitionClient rek, SqsClient sqs, String bucketName,
-            String queueName) {
+            String queueName, String queueGroup) {
 
         // Create queue or retrieve the queueUrl if it already exists.
         String queueUrl = "";
         try {
             ListQueuesRequest queuesReq = ListQueuesRequest.builder().queueNamePrefix(queueName).build();
-
             ListQueuesResponse queuesRes = sqs.listQueues(queuesReq);
 
             if (queuesRes.queueUrls().size() == 0) {
-                CreateQueueRequest request = CreateQueueRequest.builder().queueName(queueName).build();
+                CreateQueueRequest request = CreateQueueRequest.builder()
+                        .attributesWithStrings(Map.of("FifoQueue", "true", "ContentBasedDeduplication", "true"))
+                        .queueName(queueName).build();
                 sqs.createQueue(request);
 
                 GetQueueUrlRequest getQueueRequest = GetQueueUrlRequest.builder().queueName(queueName).build();
@@ -97,15 +99,16 @@ public class DetectCars {
                 List<Label> labels = result.labels();
                 for (Label label : labels) {
                     if (label.name().equals("Car")) {
-                        sqs.sendMessage(SendMessageRequest.builder().queueUrl(queueUrl).messageBody(obj.key())
-                                .delaySeconds(10).build());
+                        sqs.sendMessage(SendMessageRequest.builder().messageGroupId(queueGroup).queueUrl(queueUrl)
+                                .messageBody(obj.key()).build());
                         break;
                     }
                 }
             }
 
             // Signal the end of image processing by sending "-1" to the queue
-            sqs.sendMessage(SendMessageRequest.builder().queueUrl(queueUrl).messageBody("-1").delaySeconds(10).build());
+            sqs.sendMessage(SendMessageRequest.builder().queueUrl(queueUrl).messageGroupId(queueGroup).messageBody("-1")
+                    .build());
         } catch (Exception e) {
             System.err.println(e.getLocalizedMessage());
             System.exit(1);

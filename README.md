@@ -68,8 +68,11 @@ Install the entire SDK with the following command:
 
 ## Maven Project Setup
 
-After cloning this repository, run the following commands to generate a .jar file in the target/ directory and then run the DetectCars.java code:
+After cloning this repository, run the following commands to generate the appropriate .jar files in the target/ directories and then run the DetectCars.java and DetectText.java code:
 
-    $ cd cs643-programming-assignment/assignment1
+    $ cd cs643-programming-assignment/car-recognition
     $ mvn clean install package
-    $ java -jar target/assignment1-1.0-SNAPSHOT.jar
+    $ java -jar target/car-recognition-1.0-SNAPSHOT.jar
+    $ cd ../text-recognition
+    $ mvn clean install package
+    $ java -jar target/text-recognition-1.0-SNAPSHOT.jar
