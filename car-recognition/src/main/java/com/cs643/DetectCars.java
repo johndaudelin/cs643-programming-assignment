@@ -5,7 +5,6 @@
 
 package com.cs643;
 
-import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.rekognition.RekognitionClient;
 import software.amazon.awssdk.services.rekognition.model.Image;
@@ -13,8 +12,6 @@ import software.amazon.awssdk.services.rekognition.model.Label;
 import software.amazon.awssdk.services.rekognition.model.DetectLabelsRequest;
 import software.amazon.awssdk.services.rekognition.model.DetectLabelsResponse;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.S3Object;
@@ -26,10 +23,6 @@ import software.amazon.awssdk.services.sqs.model.ListQueuesResponse;
 import software.amazon.awssdk.services.sqs.model.QueueNameExistsException;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -65,7 +58,6 @@ public class DetectCars {
                 sqs.createQueue(request);
 
                 GetQueueUrlRequest getQueueRequest = GetQueueUrlRequest.builder().queueName(queueName).build();
-
                 queueUrl = sqs.getQueueUrl(getQueueRequest).queueUrl();
             } else {
                 queueUrl = queuesRes.queueUrls().get(0);
@@ -74,11 +66,10 @@ public class DetectCars {
             throw e;
         }
 
-        // Process each image in the S3 bucket
+        // Process the 10 images in the S3 bucket
         try {
             ListObjectsV2Request listObjectsReqManual = ListObjectsV2Request.builder().bucket(bucketName).maxKeys(10)
                     .build();
-
             ListObjectsV2Response listObjResponse = s3.listObjectsV2(listObjectsReqManual);
 
             for (S3Object obj : listObjResponse.contents()) {
@@ -86,12 +77,11 @@ public class DetectCars {
 
                 Image img = Image.builder().s3Object(software.amazon.awssdk.services.rekognition.model.S3Object
                         .builder().bucket(bucketName).name(obj.key()).build()).build();
-
                 DetectLabelsRequest request = DetectLabelsRequest.builder().image(img).minConfidence((float) 90)
                         .build();
-
                 DetectLabelsResponse result = rek.detectLabels(request);
                 List<Label> labels = result.labels();
+
                 for (Label label : labels) {
                     if (label.name().equals("Car")) {
                         sqs.sendMessage(SendMessageRequest.builder().messageGroupId(queueGroup).queueUrl(queueUrl)

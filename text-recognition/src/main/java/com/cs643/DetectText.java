@@ -48,56 +48,55 @@ public class DetectText {
     public static void processCarImages(S3Client s3, RekognitionClient rek, SqsClient sqs, String bucketName,
             String queueName) {
 
-        // Poll SQS until the appropriate queue is created (by DetectCars)
-        while (true) {
+        // Poll SQS until the queue is created (by DetectCars)
+        boolean queueExists = false;
+        while (!queueExists) {
             ListQueuesRequest queuesReq = ListQueuesRequest.builder().queueNamePrefix(queueName).build();
             ListQueuesResponse queuesRes = sqs.listQueues(queuesReq);
-
-            if (queuesRes.queueUrls().size() != 0) {
-                break;
-            }
+            if (queuesRes.queueUrls().size() > 0)
+                queueExists = true;
         }
 
-        // Retrieve the appropriate queueUrl
+        // Retrieve the queueUrl
         String queueUrl = "";
         try {
             GetQueueUrlRequest getQueueRequest = GetQueueUrlRequest.builder().queueName(queueName).build();
-
             queueUrl = sqs.getQueueUrl(getQueueRequest).queueUrl();
         } catch (QueueNameExistsException e) {
             throw e;
         }
 
-        // Process images from the queue until "-1" message is received
+        // Process every car images
         try {
             boolean endOfQueue = false;
             HashMap<String, String> outputs = new HashMap<String, String>();
+
             while (!endOfQueue) {
-                // Retrieve next message
+                // Retrieve next image index
                 ReceiveMessageRequest receiveMessageRequest = ReceiveMessageRequest.builder().queueUrl(queueUrl)
                         .maxNumberOfMessages(1).build();
                 List<Message> messages = sqs.receiveMessage(receiveMessageRequest).messages();
+
                 if (messages.size() > 0) {
                     Message message = messages.get(0);
                     String label = message.body();
 
                     if (label.equals("-1")) {
-                        System.out.println("Found -1");
                         endOfQueue = true;
                     } else {
+                        System.out.println("Processing image " + label);
+
                         Image img = Image.builder().s3Object(S3Object.builder().bucket(bucketName).name(label).build())
                                 .build();
-
                         DetectTextRequest request = DetectTextRequest.builder().image(img).build();
-
                         DetectTextResponse result = rek.detectText(request);
                         List<TextDetection> textDetections = result.textDetections();
+
                         if (textDetections.size() != 0) {
                             String text = "";
                             for (TextDetection textDetection : textDetections) {
-                                if (textDetection.type().equals(TextTypes.WORD)) {
+                                if (textDetection.type().equals(TextTypes.WORD))
                                     text = text.concat(" " + textDetection.detectedText());
-                                }
                             }
                             outputs.put(label, text);
                         }
@@ -112,9 +111,9 @@ public class DetectText {
             try {
                 FileWriter writer = new FileWriter("output.txt");
 
-                Iterator it = outputs.entrySet().iterator();
+                Iterator<Map.Entry<String, String>> it = outputs.entrySet().iterator();
                 while (it.hasNext()) {
-                    Map.Entry pair = (Map.Entry) it.next();
+                    Map.Entry<String, String> pair = it.next();
                     writer.write(pair.getKey() + ":" + pair.getValue() + "\n");
                     it.remove();
                 }
