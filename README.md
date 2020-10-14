@@ -20,11 +20,13 @@ Click on "EC2" in the services section, then click on Launch Instance -> Launch 
 
 Under Security Groups, click "Edit Security Groups" and add three rules: one for SSH, one for HTTP, and one for HTTPS. For each one, select a source of "My IP." Hit Review and Launch.
 
-Click Launch. On the dialog that pops up, select "Create a new key pair" and name it "cs643." Hit "Download key pair." Hit Launch Instances, and then hit View Instances. You will probably see a status of "Pending" for your Instance State. While waiting for this to switch to "Running, open a terminal and move the .pem file you downloaded to your home directory. Run the following command to set the correct permissions for the .pem file:
+Under Instance Details, click "Edit Instance Details." Change the number of instances to 2 instead of 1. Hit Review and Launch.
+
+Click Launch. On the dialog that pops up, select "Create a new key pair" and name it "cs643." Hit "Download key pair." Hit Launch Instances, and then hit View Instances. You will probably see a status of "Pending" for the Instance State of each EC2. While waiting for these to switch to "Running, open a terminal and move the .pem file you downloaded to your home directory. Run the following command to set the correct permissions for the .pem file:
 
     $ chmod 400 cs643.pem
 
-To connect to your EC2 instance (after the EC2 has finished loading), run the following command in your terminal (replacing <YOUR_INSTANCE_PUBLIC_DNS> with the "Public IPv4 DNS" attribute of your running EC2 instance:
+To connect to your EC2 instances (after they have started running), run the following command in your terminal (replacing <YOUR_INSTANCE_PUBLIC_DNS> with the "Public IPv4 DNS" attribute of either EC2 instance):
 
     $ ssh -i "~/cs643.pem" ec2-user@<YOUR_INSTANCE_PUBLIC_DNS>
 
@@ -33,11 +35,7 @@ After you have connected, run the following commands to update Java from 1.7 to 
     $ sudo yum install java-1.8.0-devel
     $ sudo /usr/sbin/alternatives --config java
 
-Upon running the second command, you should enter the number that corresponds to jre-1.8.0 (either 1 or 2) and hit enter.
-
-At this point, you're ready to clone the EC2 to make your second EC2. Select your already existing instance, and click on Actions -> Create Template from Instance. Name the image, "jdaudelin-image," and click "Create Launch Template." On the EC2 Dashboard, click Launch Instance -> Launch Instance from Template. Select the template that you just created ("jdaudelin-image")and leave all the default settings, but just make sure your "key pair name" is the same as the one you created for your first EC2 instance ("cs643"). Hit Launch.
-
-You will SSH into this second instance the same way you SSH'ed into your first instance, just using the new public DNS of course.
+Upon running the second command, you should enter the number that corresponds to jre-1.8.0 (either 1 or 2) and hit enter. You will need to complete this step on BOTH EC2's.
 
 ### Credentials Setup
 
@@ -52,6 +50,7 @@ In the terminal on your LOCAL machine, run the following commands to generate th
     $ mvn clean install package
     $ cd ../car-recognition
     $ mvn clean install package
+    $ cd ..
 
 Run the following command to securely copy the car-recognition .jar file to one of your EC2's, which we'll call EC2-A:
 
