@@ -1,4 +1,12 @@
-# Programming Assignment 1
+# CS643-851 Programming Assignment 1
+
+## Author
+
+John Daudelin
+
+## History
+
+Finished 10/13/2020
 
 ## AWS Steps
 
