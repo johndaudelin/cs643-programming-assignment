@@ -46,11 +46,6 @@ public class DetectCars {
         RekognitionClient rek = RekognitionClient.builder().region(region).build();
         SqsClient sqs = SqsClient.builder().region(region).build();
 
-        // CODE TO RETRIEVE ALL 10 IMAGES FROM S3 AND STORE THEM LOCALLY
-        // for (int i = 1; i < 11; i++) {
-        // getImage(s3, bucketName, Integer.toString(i) + ".jpg");
-        // }
-
         processBucketImages(s3, rek, sqs, bucketName, queueName, queueGroup);
     }
 
@@ -109,31 +104,6 @@ public class DetectCars {
             // Signal the end of image processing by sending "-1" to the queue
             sqs.sendMessage(SendMessageRequest.builder().queueUrl(queueUrl).messageGroupId(queueGroup).messageBody("-1")
                     .build());
-        } catch (Exception e) {
-            System.err.println(e.getLocalizedMessage());
-            System.exit(1);
-        }
-    }
-
-    public static void getImage(S3Client s3, String bucketName, String keyName) {
-
-        try {
-            // create a GetObjectRequest instance
-            GetObjectRequest objectRequest = GetObjectRequest.builder().key(keyName).bucket(bucketName).build();
-
-            ResponseBytes<GetObjectResponse> objectBytes = s3.getObjectAsBytes(objectRequest);
-            byte[] data = objectBytes.asByteArray();
-
-            // Write the data to a local file
-            File myFile = new File(keyName);
-            OutputStream os = new FileOutputStream(myFile);
-            os.write(data);
-            System.out.println("Successfully obtained image " + keyName + " from S3 bucket");
-
-            // Close the file
-            os.close();
-        } catch (IOException ex) {
-            ex.printStackTrace();
         } catch (Exception e) {
             System.err.println(e.getLocalizedMessage());
             System.exit(1);
