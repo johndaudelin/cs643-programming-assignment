@@ -35,13 +35,13 @@ After you have connected, run the following commands to update Java from 1.7 to 
 
 Upon running the second command, you should enter the number that corresponds to jre-1.8.0 (either 1 or 2) and hit enter.
 
-At this point, you're ready to clone the EC2 to make your second EC2. Select your already existing instance, and click on Actions -> Create Image. Name the image, "jdaudelin-image," and click "Create Image." Launch a new EC2 instance and be sure to select "jdaudelin-image" as the image for your new EC2 instance. Also, make sure to select the SAME, already existing cs643.pem key pair that you created for the first EC2 instance. Refer to [this link](https://docs.bitnami.com/aws/faq/administration/clone-server/) if any of these steps are confusing.
+At this point, you're ready to clone the EC2 to make your second EC2. Select your already existing instance, and click on Actions -> Create Template from Instance. Name the image, "jdaudelin-image," and click "Create Launch Template." On the EC2 Dashboard, click Launch Instance -> Launch Instance from Template. Select the template that you just created ("jdaudelin-image")and leave all the default settings, but just make sure your "key pair name" is the same as the one you created for your first EC2 instance ("cs643"). Hit Launch.
 
-You will SSH into this second instance the same way you SSH into your first instance, just using the new public DNS of course.
+You will SSH into this second instance the same way you SSH'ed into your first instance, just using the new public DNS of course.
 
 ### Credentials Setup
 
-Login to your AWS Educate account, and in Vocareum, click on "Account Details." Click on "Access your credentials" and copy the text that is displayed. SSH into both EC2's that you created in the previous step, and on each one, create a file, `~/.aws/credentials`. Paste those copied credentials into this file on each EC2. You will need to re-copy and paste these credentials onto both EC2's whenever they change (after your session ends).
+Login to your AWS Educate account, and in Vocareum, click on "Account Details." Next to "AWS CLI," click Show and copy the text that is displayed. SSH into both EC2's that you created in the previous step, and on each one, create a file, `~/.aws/credentials`. Paste those copied credentials into this file on each EC2. You will need to re-copy and paste these credentials onto both EC2's whenever they change (after your session ends).
 
 ### Running the application
 
