@@ -1,6 +1,7 @@
 // Author: John Daudelin
 // CS643-851 Programming Assignment 1
 // This code is intended to run on EC2 B
+// This code relies on dependencies specified in this repo: https://github.com/johndaudelin/cs643-programming-assignment
 // I used example code from this repository: https://github.com/awsdocs/aws-doc-sdk-examples/blob/master/javav2/example_code/
 
 package com.cs643;
